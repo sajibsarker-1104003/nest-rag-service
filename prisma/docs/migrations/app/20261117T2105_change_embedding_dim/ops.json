@@ -1,0 +1,59 @@
+[
+  {
+    "id": "alterType.Document.embedding",
+    "label": "Alter type of \"Document\".\"embedding\" to vector(1024)",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "embedding",
+        "table": "Document"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"embedding\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Document",
+          "embedding"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"embedding\" on \"Document\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"embedding\" to vector(1024)",
+        "sql": "ALTER TABLE \"public\".\"Document\" ALTER COLUMN \"embedding\" TYPE vector(1024) USING \"embedding\"::vector(1024)",
+        "meta": {
+          "convertedColumn": {
+            "table": "Document",
+            "column": "embedding",
+            "by": "cast"
+          }
+        }
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"embedding\" has type \"vector(1024)\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Document",
+          "embedding",
+          "vector(1024)"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  }
+]

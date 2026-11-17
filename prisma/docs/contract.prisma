@@ -1,0 +1,13 @@
+
+// use prisma-8
+
+types {
+  Embedding1024 = pgvector.Vector(1024)
+}
+
+model Document {
+  id        Int            @id @default(autoincrement())
+  content   String
+  embedding Embedding1024?
+  createdAt DateTime       @default(now())
+}
