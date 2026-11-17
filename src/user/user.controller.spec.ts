@@ -1,4 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { UserController } from './user.controller.js';
 import { UserService } from './user.service.js';
 
@@ -6,12 +7,12 @@ describe('UserController', () => {
   let controller: UserController;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const moduleRef = await Test.createTestingModule({
       controllers: [UserController],
-      providers: [UserService],
+      providers: [{ provide: UserService, useValue: {} }],
     }).compile();
 
-    controller = module.get<UserController>(UserController);
+    controller = moduleRef.get(UserController);
   });
 
   it('should be defined', () => {
