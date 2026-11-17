@@ -7,7 +7,7 @@ local embeddings, and JWT authentication.
 
 ## Overview
 
-TODO: 2-3 sentences. What problem does this service solve? Why local embeddings
+Ingest text documents, embed them with a local model, and answer questions using the most similar documents as context. See docs/architecture.md for flows and known limitations.
 (cost, privacy, latency)?
 
 ## Architecture
@@ -26,7 +26,8 @@ Details: [docs/architecture.md](docs/architecture.md)
 - NestJS (TypeScript)
 - Prisma
 - PostgreSQL with pgvector
-- Local embedding model (TODO: name the model)
+- Local embedding model: deepvk/USER-bge-m3 (1024 dimensions), OpenAI-compatible server
+- Chat: any OpenAI-compatible provider (Groq by default)
 - JWT authentication
 - Vitest, oxlint, Prettier, Docker Compose
 
