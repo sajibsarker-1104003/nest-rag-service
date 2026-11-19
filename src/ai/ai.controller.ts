@@ -7,14 +7,10 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { AiService } from './ai.service.js';
+import { AskDto, IngestDto } from './dto/ai.dto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard.js';
 
 @ApiTags('ai')
@@ -26,8 +22,7 @@ export class AiController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Ingest a document (embed + store)' })
-  @ApiBody({ schema: { properties: { content: { type: 'string' } } } })
-  ingest(@Body() dto: { content: string }) {
+  ingest(@Body() dto: IngestDto) {
     return this.ai.ingest(dto.content);
   }
 
@@ -35,8 +30,7 @@ export class AiController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Ask a question using stored documents' })
-  @ApiBody({ schema: { properties: { question: { type: 'string' } } } })
-  ask(@Body() dto: { question: string }) {
+  ask(@Body() dto: AskDto) {
     return this.ai.ask(dto.question);
   }
 
@@ -45,8 +39,7 @@ export class AiController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Ask a question, answer streamed over SSE' })
-  @ApiBody({ schema: { properties: { question: { type: 'string' } } } })
-  async askStream(@Body() dto: { question: string }, @Res() res: Response) {
+  async askStream(@Body() dto: AskDto, @Res() res: Response) {
     res.set({
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
@@ -55,7 +48,7 @@ export class AiController {
     });
     res.flushHeaders();
 
-    // Cancel the upstream LLM call if the client disconnects early.
+    // Client disconnect hole upstream LLM request cancel hobe.
     const ac = new AbortController();
     res.on('close', () => {
       if (!res.writableEnded) ac.abort();

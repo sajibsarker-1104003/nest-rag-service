@@ -1,0 +1,15 @@
+group,question,topDistance,promptTokens,completionTokens,ttftMs,latencyMs,costUsd
+on,"How many days do I have to get a refund?",0.246,141,60,748,783,0.000057
+on,"What happens after 30 days for refunds?",0.229,139,73,772,813,0.000065
+on,"How long does standard delivery take?",0.341,140,51,658,686,0.000052
+on,"How much extra is express delivery?",0.356,140,51,860,884,0.000052
+on,"What are the support hours?",0.297,136,74,750,798,0.000065
+on,"Which days is support available?",0.283,136,69,765,782,0.000062
+on,"What is the support email?",0.315,136,55,836,860,0.000053
+on,"Can I get store credit instead of a refund?",0.254,140,234,1184,1285,0.000161
+on,"Is express delivery available in Bangladesh?",0.260,168,125,952,1011,0.000100
+on,"What time zone does support use?",0.411,137,70,926,945,0.000063
+off,"What is the capital of France?",,,,,,
+off,"Who won the 2022 World Cup?",,,,,,
+off,"How do I bake a chocolate cake?",,,,,,
+off,"Explain quantum computing in one sentence.",,,,,,

@@ -13,6 +13,7 @@ All settings come from environment variables. Copy `.env.example` to `.env`. Nev
 | CHAT_BASE_URL | no | OpenAI-compatible chat endpoint | https://api.groq.com/openai/v1 |
 | CHAT_API_KEY | yes | API key for the chat provider | none |
 | CHAT_MODEL | no | Chat model. Set it explicitly (see note below) | llama-3.3-70b-versatile (code fallback) |
+| RAG_MAX_DISTANCE | no | Maximum cosine distance for a document to be used as context. Lower is stricter | 0.45 |
 | OBSERVE_APP_KEY / OBSERVE_APP_SECRET | no | NestJS Observe telemetry | none |
 
 ## Note on `CHAT_MODEL`
@@ -21,6 +22,9 @@ The code falls back to `llama-3.3-70b-versatile` when `CHAT_MODEL` is not set, b
 ```
 CHAT_MODEL=openai/gpt-oss-120b
 ```
+
+## Note on `RAG_MAX_DISTANCE`
+Documents farther than this cosine distance are dropped before the prompt is built. If none remain, the service answers `No relevant documents found.` and does not call the chat model. The value 0.45 was chosen from a small test set (see [ADR-0006](0006-similarity-threshold.md) and [benchmarks](benchmarks.md)). If good questions start returning no results, raise it (for example 0.55). If unrelated documents get through, lower it. Re-tune it when the embedding model or the document set changes.
 
 ## Variables for the baseline script
 `scripts/baseline.ts` reads these from the shell, not from `.env`:
