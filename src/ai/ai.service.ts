@@ -30,20 +30,23 @@ export class AiService {
     // Local embedder (no API key needed)
     this.embeddingClient = new OpenAI({
       apiKey: 'not-needed',
-      baseURL:
-        this.config.get('EMBEDDING_BASE_URL') ?? 'http://localhost:8091/v1',
+      baseURL: this.config.get('EMBEDDING_BASE_URL') ?? 'http://localhost:8091/v1',
     });
 
     // Chat provider (Groq by default), OpenAI-compatible
     this.chatClient = new OpenAI({
       apiKey: this.config.getOrThrow('CHAT_API_KEY'),
-      baseURL:
-        this.config.get('CHAT_BASE_URL') ?? 'https://api.groq.com/openai/v1',
+      baseURL: this.config.get('CHAT_BASE_URL') ?? 'https://api.groq.com/openai/v1',
     });
   }
 
   private get chatModel(): string {
     return this.config.get<string>('CHAT_MODEL') ?? 'llama-3.3-70b-versatile';
+  }
+
+  /** Maximum cosine distance for a document to be used as context. */
+  private get maxDistance(): number {
+    return Number(this.config.get('RAG_MAX_DISTANCE') ?? 0.45);
   }
 
   /** Embed text with the local model. Must match the 1024-dim contract. */
@@ -63,14 +66,14 @@ export class AiService {
     return vector;
   }
 
-  /** pgvector similarity search: cosineDistance -> <=>, asc = closest first. */
+  /** pgvector similarity search, then drop documents farther than maxDistance. */
   private async retrieve(question: string, limit = 5) {
     const queryVector = await this.embed(question);
 
-    const plan = this.prisma.docs.sql.public.Document.select('id', 'content')
-      .select('distance', (f, fns) =>
-        fns.cosineDistance(f.embedding, queryVector),
-      )
+    // cosineDistance -> <=>, asc = closest first
+    const plan = this.prisma.docs.sql.public.Document
+      .select('id', 'content')
+      .select('distance', (f, fns) => fns.cosineDistance(f.embedding, queryVector))
       .orderBy((f, fns) => fns.cosineDistance(f.embedding, queryVector), {
         direction: 'asc',
       })
@@ -164,8 +167,7 @@ export class AiService {
     );
 
     let ttftMs: number | undefined;
-    let usage:
-      { prompt_tokens?: number; completion_tokens?: number } | undefined;
+    let usage: { prompt_tokens?: number; completion_tokens?: number } | undefined;
 
     for await (const chunk of stream) {
       const delta = chunk.choices[0]?.delta?.content;
@@ -185,9 +187,5 @@ export class AiService {
     };
     this.logger.log(`ask_stream ${JSON.stringify(done)}`);
     yield { type: 'done', data: done };
-  }
-
-  private get maxDistance(): number {
-    return Number(this.config.get('RAG_MAX_DISTANCE') ?? 0.45);
   }
 }
